@@ -1,0 +1,320 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using MelonLoader;
+using HarmonyLib;
+using System.Collections;
+using UnityEngine.SceneManagement;
+using JetBrains.Annotations;
+using UnityEngine.UI;
+using static RootMotion.Demos.Turret;
+using Crosstales;
+using MelonLoader.Utils;
+using TMPro.Examples;
+using TMPro;
+using UnityEngine.TextCore.Text;
+using UnityEngine.AzureSky;
+
+
+namespace TestMod
+{
+    public class TestModClass : MelonMod
+    {
+        bool menuOpen = false;
+        bool isFlying = false;
+        bool notdriverInvincible = true;
+        public bool apply = false;
+
+        public float gravity = -9.81f;
+        public float trackLength = 1f;
+        public float speed = 10;
+        public float rotationSpeed = 400f;
+
+
+        SledData sledData;
+
+        public float originalTrackLength;
+        public float originalGravity = -9.81f;
+
+        public bool hasOriginalValues = false;
+        public bool valuesReset = false;
+
+        public GameObject parentObject = null;
+        public GameObject trackRenderer = null;
+        RagDollCollisionController ragDollCollisionController = null;
+
+        private GameObject body;
+        private GameObject track;
+        private GameObject ragdollTerrainTrigger;
+        private GameObject IkPlayer = null;
+
+        private Rigidbody rb;
+        private MeshInterpretter meshInterpretter;
+        private SnowmobileController snowmobileController;
+        private SnowmobileControllerBase snowmobileControllerBase;
+
+
+        private void getSnowmobileComponents()
+        {
+            body = GameObject.Find("Snowmobile(Clone)/Body");
+            track = GameObject.Find("Snowmobile(Clone)/Body/Track");
+            ragdollTerrainTrigger = GameObject.Find("Snowmobile(Clone)/Body/RagdollTerrainTrigger");
+            if (GameObject.Find("Snowmobile(Clone)/Body/IK Player (Drivers)"))
+            {
+                IkPlayer = GameObject.Find("Snowmobile(Clone)/Body/IK Player (Drivers)");
+                ragDollCollisionController = IkPlayer.GetComponent<RagDollCollisionController>();
+            }
+            rb = body.GetComponent<Rigidbody>();
+
+            meshInterpretter = body.GetComponent<MeshInterpretter>();
+            sledData = new SledData();
+            snowmobileController = body.GetComponent<SnowmobileController>();
+            snowmobileControllerBase = body.GetComponent<SnowmobileControllerBase>();
+
+        }
+
+        private void copyValues(MeshInterpretter originValues, MeshInterpretter destinationValues)
+        {
+            destinationValues.power = originValues.power;
+            destinationValues.lugHeight = originValues.lugHeight;
+            destinationValues.pitchFactor = originValues.pitchFactor;
+            destinationValues.coefficientOfFriction = originValues.coefficientOfFriction;
+            destinationValues.snowPushForceFactor = originValues.snowPushForceFactor;
+        }
+
+        private void getOriginalValues()
+        {
+            originalTrackLength = track.transform.localScale.z;
+            originalGravity = Physics.gravity.y;
+
+            //originalValues = meshInterpretter;
+
+            copyValues(meshInterpretter, sledData.originalValues);
+            copyValues(meshInterpretter, sledData.newValues);
+            //newValues = meshInterpretter;
+
+            foreach (Transform parent in body.transform)
+            {
+                if (parent.Find("CharacterControlPoints"))
+                {
+                    parentObject = parent.gameObject;
+
+                    Melon<TestModClass>.Logger.Msg("Found parent object: " + parentObject.name);
+                }
+            }
+        }
+
+        public float DrawSlider(Vector2 size, float value, string text, int index, int startpos, float minValue, float maxValue)
+        {
+            int marginLeft = 20;
+            int sizeY = 40;
+            GUI.Label(new Rect(marginLeft, startpos + sizeY * index, size.x - marginLeft * 2, 40), text);
+            value = float.Parse(GUI.TextField(new Rect(size.x - marginLeft - 80, startpos + sizeY * index, 80, 20), value.ToString()));
+            value = GUI.HorizontalSlider(new Rect(marginLeft, startpos + sizeY * index + 20, size.x - marginLeft * 2, 20), value, minValue, maxValue);
+            return value;
+        }
+
+        public void DrawMenuWindow(int windowID)
+        {
+            int width = 300;
+            int height = 500;
+
+            GUIStyle centeredStyle = new GUIStyle(GUI.skin.label);
+            centeredStyle.alignment = TextAnchor.MiddleCenter;
+
+            Vector2Int menuSize = new Vector2Int(width, height);
+
+            DrawStuff(menuSize);
+
+            GUI.Label(new Rect(menuSize.x / 2 - 100, menuSize.y - 40, 200, 20), "Made by Samisalami", centeredStyle);
+
+            // Make the window draggable
+            GUI.DragWindow(new Rect(0, 0, menuSize.x, 20));
+        }
+
+        public void DrawStuff(Vector2 size)
+        {
+            int offsety = 30;
+            int marginLeft = 20;
+            int marginRight = 20;
+            apply = GUI.Toggle(new Rect(marginLeft, offsety, 80, 20), apply, new GUIContent("Apply"));
+            notdriverInvincible = GUI.Toggle(new Rect(marginLeft, offsety + 20, 200, 20), notdriverInvincible, new GUIContent("DriverRagdoll"));
+            if (GUI.Button(new Rect(size.x - marginRight - 80, offsety, 80, 20), "Reset"))
+            {
+                valuesReset = true;
+            }
+
+            MeshInterpretter newValues = sledData.newValues;
+
+            speed = DrawSlider(size, speed, "Speed", 0, offsety + 30, 0, 200);
+            gravity = DrawSlider(size, gravity, "Gravity", 1, offsety + 30, -10, 10);
+            newValues.power = DrawSlider(size, newValues.power, "Power", 2, offsety + 30, 0, 300000);
+            newValues.lugHeight = DrawSlider(size, newValues.lugHeight, "Lugheight", 3, offsety + 30, 0, 2);
+            newValues.pitchFactor = DrawSlider(size, newValues.pitchFactor, "Pitchfactor", 4, offsety + 30, 2, 30);
+            newValues.coefficientOfFriction = DrawSlider(size, newValues.coefficientOfFriction, "CoefficientOfFriction", 5, offsety + 30, 0, 5);
+            newValues.snowPushForceFactor = DrawSlider(size, newValues.snowPushForceFactor, "SnowPushForceFactor", 6, offsety + 30, 0, 100);
+            trackLength = DrawSlider(size, trackLength, "TrackLength", 7, offsety + 30, 0.5f, 2);
+
+
+        }
+
+        private Rect menuRect = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 250, 300, 500); // Initial position and size
+
+        private void drawMenu()
+        {
+            if (menuOpen)
+            {
+                menuRect = GUI.Window(1, menuRect, DrawMenuWindow, "Simple Mod Menu");
+            }
+        }
+
+        public override void OnInitializeMelon()
+        {
+            MelonEvents.OnGUI.Subscribe(drawMenu, 100);
+        }
+
+        public override void OnUpdate()
+        {
+            Scene currentScene = SceneManager.GetActiveScene();
+
+            if (Input.GetKeyUp(KeyCode.J))
+            {
+                isFlying = !isFlying;
+            }
+            if (Input.GetKeyUp(KeyCode.RightShift))
+            {
+                menuOpen = !menuOpen;
+            }
+            if (valuesReset)
+            {
+                //newValues = originalValues;
+                copyValues(sledData.originalValues, sledData.newValues);
+
+                notdriverInvincible = true;
+
+                valuesReset = false;
+            }
+
+
+            if (currentScene.name != "Garage" && currentScene.name != "TitleScreen")
+            {
+                if (menuOpen)
+                {
+                    Cursor.visible = true;
+                }
+
+                if (hasOriginalValues == false)
+                {
+
+                    getSnowmobileComponents();
+                    getOriginalValues();
+
+                    hasOriginalValues = true;
+                    valuesReset = true;
+                }
+
+                if (!parentObject)
+                {
+                    hasOriginalValues = false;
+                    return;
+                }
+
+                if (trackRenderer != null)
+                {
+                    trackRenderer.transform.localScale = new Vector3(trackLength, 1, 1);
+                }
+
+                if (apply)
+                {
+                    //meshInterpretter = newValues;
+                    copyValues(sledData.newValues, meshInterpretter);
+
+                    track.transform.localScale = new Vector3(1, 1, trackLength);
+                    ragdollTerrainTrigger.SetActive(notdriverInvincible);
+                    if (ragDollCollisionController != null)
+                    {
+                        ragDollCollisionController.enabled = notdriverInvincible;
+                    }
+
+                    Physics.gravity = new Vector3(0, gravity, 0);
+                }
+                else
+                {
+                    track.transform.localScale = new Vector3(1, 1, originalTrackLength);
+
+                    ragdollTerrainTrigger.SetActive(true);
+                    if (ragDollCollisionController != null)
+                    {
+                        ragDollCollisionController.enabled = true;
+                    }
+
+                    Physics.gravity = new Vector3(0, originalGravity, 0);
+                }
+
+                if (isFlying)
+                {
+                    Physics.gravity = new Vector3(0, 0, 0);
+
+                    Vector3 forwardDirection = rb.transform.forward;
+                    rb.velocity = Vector3.zero;
+                    rb.angularVelocity = Vector3.zero;
+                    flight(forwardDirection);
+                }
+                else
+                {
+                    //Physics.gravity = new Vector3(0, -9.81f, 0);
+
+                    rb.AddForce(Vector3.zero);
+                    //MelonLoader.MelonLogger.Msg("constraints: " + rb.constraints);
+
+                }
+            }
+            else
+            {
+                hasOriginalValues = false;
+            }
+        }
+        private void flight(Vector3 forwardDirection)
+        {
+            if (Input.GetKey(KeyCode.Space))
+            {
+                rb.MovePosition(rb.position + rb.transform.up * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                rb.MovePosition(rb.position - rb.transform.up * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.UpArrow))
+            {
+                rb.MovePosition(rb.position + forwardDirection * speed * Time.deltaTime);
+                //rb.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+            if (Input.GetKey(KeyCode.DownArrow))
+            {
+                rb.MovePosition(rb.position - forwardDirection * speed * Time.deltaTime);
+                //rb.constraints = RigidbodyConstraints.FreezeRotation;
+            }
+
+            // Rotate the Rigidbody using the left and right arrow keys
+            if (Input.GetKey(KeyCode.LeftArrow)) // Detect if the left arrow key is held down
+            {
+                // Rotate the Rigidbody to the left (counter-clockwise)
+                Quaternion deltaRotation = Quaternion.Euler(0, -rotationSpeed * Time.deltaTime, 0);
+                rb.MoveRotation(rb.rotation * deltaRotation);
+            }
+
+            if (Input.GetKey(KeyCode.RightArrow)) // Detect if the right arrow key is held down
+            {
+                // Rotate the Rigidbody to the right (clockwise)
+                Quaternion deltaRotation = Quaternion.Euler(0, rotationSpeed * Time.deltaTime, 0);
+                rb.MoveRotation(rb.rotation * deltaRotation);
+            }
+        }
+
+    }
+
+
+}
