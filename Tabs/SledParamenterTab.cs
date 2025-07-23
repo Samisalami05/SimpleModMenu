@@ -1,23 +1,34 @@
-﻿using TestMod;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace SimpleModMenu.Tabs
 {
     internal class SledParamenterTab : Tab
     {
-        private SledData sledData;
-        public SledParamenterTab(string title, Vector2 size, Vector2 position, SledData sledData) : base(title, size, position)
+        private SledParameters sledPararms;
+        public SledParamenterTab(Vector2 size, Vector2 position, SledParameters sledParam) : base("SledParameters", size, position)
         {
-            this.sledData = sledData;
+            this.sledPararms = sledParam;
         }
-        // Override the DrawTab method to implement the sled parameter tab UI
+        
         public override void DrawTab()
         {
-            // Draw the sled parameter tab UI here
-            // You can use GUILayout and other Unity UI elements to create the sled parameter interface
+            base.DrawTab();
+            if (sledPararms == null)
+            {
+                GUILayout.Label("Sled Parameters not initialized.");
+                return;
+            }
+            SledData sledData = sledPararms.sledData;
+            if (sledData == null) return; // Return if no sled is found
+
             GUILayout.Label("Sled Parameter Tab");
             GUILayout.Label("This is where you can adjust sled parameters.");
-            DrawSlider(title, ref sledData.originalValues.power, 0f, 100f);
+
+            DrawSlider("Power", ref sledData.newValues.power, 0f, 300000f);
+            DrawSlider("Lug Height", ref sledData.newValues.lugHeight, 0f, 3f);
+            DrawSlider("Pitch Factor", ref sledData.newValues.pitchFactor, 0f, 10f);
+            DrawSlider("Friction", ref sledData.newValues.coefficientOfFriction, 0f, 5f);
+            DrawSlider("Snow Push Force", ref sledData.newValues.snowPushForceFactor, 0f, 100f);
         }
     }
 }

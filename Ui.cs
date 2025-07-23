@@ -1,8 +1,7 @@
-﻿using SimpleModMenu;
-using SimpleModMenu.Tabs;   
+﻿using SimpleModMenu.Tabs;   
 using UnityEngine;
 
-namespace TestMod
+namespace SimpleModMenu
 {
     internal class Ui
     {
@@ -16,11 +15,10 @@ namespace TestMod
         private int selectedTab = 0;
         private List<Tab> tabs = new List<Tab>();
 
-        private SledData sledData;
+        private SledParameters sledParams;
 
-        public Ui(SledData sledData)
+        public Ui()
         {
-            this.sledData = sledData;
             this.menuOpen = false;
             this.menuSize = new Vector2(800, 600);
             this.menuPos = new Vector2(Screen.width / 2 - menuSize.x / 2, Screen.height / 2 - menuSize.y / 2);
@@ -33,10 +31,10 @@ namespace TestMod
 
         private void initTabs()
         {
-            tabs.Add(new SledParamenterTab("Sled", new Vector2(800, 600), new Vector2(0, 0), sledData));
-            tabs.Add(new EnvironmentTab("Environment", new Vector2(800, 600), new Vector2(0, 0)));
-            tabs.Add(new FunTab("Fun", new Vector2(800, 600), new Vector2(0, 0)));
-            tabs.Add(new SettingsTab("Settings", new Vector2(800, 600), new Vector2(0, 0)));
+            tabs.Add(new SledParamenterTab(new Vector2(800, 600), new Vector2(0, 0), sledParams));
+            tabs.Add(new EnvironmentTab(new Vector2(800, 600), new Vector2(0, 0)));
+            tabs.Add(new FunTab(new Vector2(800, 600), new Vector2(0, 0)));
+            tabs.Add(new SettingsTab(new Vector2(800, 600), new Vector2(0, 0)));
         }
 
         public void DrawMenu()
@@ -44,8 +42,6 @@ namespace TestMod
             if (!menuOpen) return;
 
             menuRect = GUI.Window(1, menuRect, DrawMenuWindow, "Simple Mod Menu");
-
-
         }
 
         private void DrawMenuWindow(int windowID)
@@ -93,6 +89,12 @@ namespace TestMod
                 tabs[selectedTab].DrawTab();
             }
             GUI.EndGroup();
+        }
+
+        public void setSledParams(SledParameters sledParams)
+        {
+            this.sledParams = sledParams;
+            this.tabs[tabs.FindIndex(tab => tab.title == "SledParameters")] = new SledParamenterTab(new Vector2(800, 600), new Vector2(0, 0), sledParams);
         }
     }
 }

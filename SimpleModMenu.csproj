@@ -547,6 +547,7 @@
 
 	<ItemGroup>
 		<Compile Include="Core.cs" />
+		<Compile Include="SledParameters.cs" />
 		<Compile Include="Tabs\EnvironmentTab.cs" />
 		<Compile Include="Tabs\FunTab.cs" />
 		<Compile Include="Tabs\SettingsTab.cs" />

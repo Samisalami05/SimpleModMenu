@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TestMod
+namespace SimpleModMenu
 {
     internal class SledData
     {
@@ -15,7 +15,26 @@ namespace TestMod
         {
             this.originalValues = new MeshInterpretter();
             this.newValues = new MeshInterpretter();
-            originalValues.power = 1;
+        }
+
+        public SledData(MeshInterpretter originalValues, MeshInterpretter newValues)
+        {
+            this.originalValues = originalValues;
+            this.newValues = newValues;
+        }
+
+        public void resetToOriginal()
+        {
+            CopyValues(originalValues, newValues);
+        }
+
+        public static void CopyValues(MeshInterpretter originValues, MeshInterpretter destinationValues)
+        {
+            destinationValues.power = originValues.power;
+            destinationValues.lugHeight = originValues.lugHeight;
+            destinationValues.pitchFactor = originValues.pitchFactor;
+            destinationValues.coefficientOfFriction = originValues.coefficientOfFriction;
+            destinationValues.snowPushForceFactor = originValues.snowPushForceFactor;
         }
     }
 }
