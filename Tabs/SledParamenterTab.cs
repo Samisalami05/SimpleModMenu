@@ -29,6 +29,11 @@ namespace SimpleModMenu.Tabs
             DrawSlider("Pitch Factor", ref sledData.newValues.pitchFactor, 0f, 10f);
             DrawSlider("Friction", ref sledData.newValues.coefficientOfFriction, 0f, 5f);
             DrawSlider("Snow Push Force", ref sledData.newValues.snowPushForceFactor, 0f, 100f);
+
+            DrawButton("Apply Changes", () =>
+            {
+                sledPararms.Apply();
+            });
         }
     }
 }

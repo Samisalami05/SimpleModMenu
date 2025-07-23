@@ -12,6 +12,8 @@ namespace SimpleModMenu
         private SledParameters sledParams;
         private Ui ui;
 
+        private string sceneName = "";
+
         public override void OnApplicationStart()
         {
             ui = new Ui();
@@ -19,6 +21,7 @@ namespace SimpleModMenu
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
+            this.sceneName = sceneName;
             if (sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene") return;
 
             sledParams = new SledParameters();
@@ -30,12 +33,23 @@ namespace SimpleModMenu
             if (Input.GetKeyDown(KeyCode.RightShift))
             {
                 ui.menuOpen = !ui.menuOpen;
-                Cursor.visible = ui.menuOpen;
+                if (sceneName != "TitleScreen" || sceneName != "Garage" || sceneName != "LoadingScene")
+                {
+                    Cursor.visible = ui.menuOpen;
+                }
                 MelonLogger.Msg("Right Shift pressed, toggling menu: " + ui.menuOpen);
+            }
+            
+            if (sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene") return;
+
+            if (sledParams != null)
+            {
+                sledParams.CheckIfSledChanged();
             }
 
             if (sledParams != null && sledParams.isInitialized && sledParams.sledData == null)
             {
+                sledParams.GetMeshInterpretter();
                 sledParams.GetSledData();
 
                 if (sledParams.sledData != null) 

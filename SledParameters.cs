@@ -12,6 +12,8 @@ namespace SimpleModMenu
         private GameObject body;
         private GameObject sled;
 
+        private MeshInterpretter meshInterpretter;
+
         public SledData sledData;
 
         public bool isInitialized = false;
@@ -55,12 +57,6 @@ namespace SimpleModMenu
 
         public void GetSledData()
         {
-            if (body == null || sled == null)
-            {
-                Melon<Core>.Logger.Error("Sled or body is null, cannot get sled data.");
-                return;
-            }
-            MeshInterpretter meshInterpretter = body.GetComponent<MeshInterpretter>();
             if (meshInterpretter == null)
             {
                 Melon<Core>.Logger.Error("MeshInterpretter component not found on sled.");
@@ -71,14 +67,8 @@ namespace SimpleModMenu
             SledData.CopyValues(meshInterpretter, sledData.newValues);
         }
 
-        public void Apply(SledData sledData)
+        public void Apply()
         {
-            if (body == null || sled == null)
-            {
-                Melon<Core>.Logger.Error("Sled or body is null, cannot apply sled data.");
-                return;
-            }
-            MeshInterpretter meshInterpretter = body.GetComponent<MeshInterpretter>();
             if (meshInterpretter == null)
             {
                 Melon<Core>.Logger.Error("MeshInterpretter component not found on sled.");
@@ -87,12 +77,37 @@ namespace SimpleModMenu
             SledData.CopyValues(sledData.newValues, meshInterpretter);
         }
 
+        public void GetMeshInterpretter()
+        {
+            if (body == null)
+            {
+                Melon<Core>.Logger.Error("Body is null, cannot get MeshInterpretter.");
+                return;
+            }
+            this.meshInterpretter = body.GetComponent<MeshInterpretter>();
+            if (meshInterpretter == null)
+            {
+                Melon<Core>.Logger.Error("MeshInterpretter component not found on sled.");
+            }
+        }
+
         public void Reload()
         {
             FindBody();
             if (body == null) { Melon<Core>.Logger.Error("Body not found during reload"); }
             FindSled();
             if (sled == null) { Melon<Core>.Logger.Error("Sled not found during reload"); }
+        }
+         
+        public void CheckIfSledChanged()
+        {
+            if (body == null || sled == null && isInitialized)
+            {
+                FindBody();
+                FindSled();
+                GetMeshInterpretter();
+                GetSledData();
+            }
         }
     }
 }
