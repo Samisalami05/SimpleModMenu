@@ -37,18 +37,18 @@ namespace SimpleModMenu
                 {
                     Cursor.visible = ui.menuOpen;
                 }
-                MelonLogger.Msg("Right Shift pressed, toggling menu: " + ui.menuOpen);
             }
             
             if (sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene") return;
 
-            if (sledParams != null)
+            if (sledParams != null && sledParams.sledData != null)
             {
                 sledParams.CheckIfSledChanged();
             }
 
             if (sledParams != null && sledParams.isInitialized && sledParams.sledData == null)
             {
+                MelonLogger.Msg("Sled Parameters initialized, fetching sled data...");
                 sledParams.GetMeshInterpretter();
                 sledParams.GetSledData();
 

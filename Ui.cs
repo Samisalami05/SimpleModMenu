@@ -6,8 +6,6 @@ namespace SimpleModMenu
     internal class Ui
     {
         public bool menuOpen;
-        public Vector2 menuSize;
-        public Vector2 menuPos;
         public Color themeColor;
 
         private Rect menuRect;
@@ -20,9 +18,12 @@ namespace SimpleModMenu
         public Ui()
         {
             this.menuOpen = false;
-            this.menuSize = new Vector2(800, 600);
-            this.menuPos = new Vector2(Screen.width / 2 - menuSize.x / 2, Screen.height / 2 - menuSize.y / 2);
-            this.menuRect = new Rect(menuPos.x, menuPos.y, menuSize.x, menuSize.y);
+
+            Vector2 menuSize = new Vector2(800, 600);
+            float x = Screen.width / 2 - menuSize.x / 2;
+            float y = Screen.height / 2 - menuSize.y / 2;
+
+            this.menuRect = new Rect(x, y, menuSize.x, menuSize.y);
             this.themeColor = new Vector4(1f, 0f, 0f, 1f); // Red
 
             initTabs();
@@ -31,10 +32,10 @@ namespace SimpleModMenu
 
         private void initTabs()
         {
-            tabs.Add(new SledParamenterTab(new Vector2(800, 600), new Vector2(0, 0), sledParams));
-            tabs.Add(new EnvironmentTab(new Vector2(800, 600), new Vector2(0, 0)));
-            tabs.Add(new FunTab(new Vector2(800, 600), new Vector2(0, 0)));
-            tabs.Add(new SettingsTab(new Vector2(800, 600), new Vector2(0, 0)));
+            tabs.Add(new SledParamenterTab(menuRect.size, new Vector2(0, 0), sledParams));
+            tabs.Add(new EnvironmentTab(menuRect.size, new Vector2(0, 0)));
+            tabs.Add(new FunTab(menuRect.size, new Vector2(0, 0)));
+            tabs.Add(new SettingsTab(menuRect.size, new Vector2(0, 0)));
         }
 
         public void DrawMenu()
@@ -51,10 +52,10 @@ namespace SimpleModMenu
 
             DrawTabs();
 
-            GUI.Label(new Rect(menuSize.x / 2 - 100, menuSize.y - 40, 200, 20), "Made by Samisalami", centeredStyle);
+            GUI.Label(new Rect(menuRect.width / 2 - 100, menuRect.height - 40, 200, 20), "Made by Samisalami", centeredStyle);
 
             // Make the window draggable
-            GUI.DragWindow(new Rect(0, 0, menuSize.x, 20));
+            GUI.DragWindow(new Rect(0, 0, menuRect.width, 20));
         }
 
         private void DrawTabs()
@@ -80,7 +81,7 @@ namespace SimpleModMenu
 
         private void DrawTabContent()
         {
-            Rect tabContentRect = new Rect(0, 40, menuSize.x, menuSize.y - 40);
+            Rect tabContentRect = new Rect(0, 40, menuRect.width, menuRect.height - 40);
             GUI.BeginGroup(tabContentRect);
             
             // Draw the content of the selected tab
@@ -94,7 +95,7 @@ namespace SimpleModMenu
         public void setSledParams(SledParameters sledParams)
         {
             this.sledParams = sledParams;
-            this.tabs[tabs.FindIndex(tab => tab.title == "SledParameters")] = new SledParamenterTab(new Vector2(800, 600), new Vector2(0, 0), sledParams);
+            this.tabs[tabs.FindIndex(tab => tab.title == "SledParameters")] = new SledParamenterTab(menuRect.size, new Vector2(0, 0), sledParams);
         }
     }
 }

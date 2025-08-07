@@ -13,7 +13,7 @@ namespace SimpleModMenu.Tabs
         {
             base.DrawTab();
             GUILayout.Label("Settings Tab");
-            GUILayout.Label("This is where you can adjust settings for the mod.");
+            GUILayout.Label("This is where you can adjust settings in the menu.");
         }
     }
 }
