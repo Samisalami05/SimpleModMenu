@@ -4,7 +4,7 @@ namespace SimpleModMenu.Tabs
 {
     internal class FunTab : Tab
     {
-        public FunTab(Vector2 size, Vector2 position) : base("Fun", size, position)
+        public FunTab() : base("Fun")
         {
             // Initialize any fun-specific data here
         }

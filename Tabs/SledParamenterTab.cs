@@ -5,7 +5,7 @@ namespace SimpleModMenu.Tabs
     internal class SledParamenterTab : Tab
     {
         private SledParameters sledPararms;
-        public SledParamenterTab(Vector2 size, Vector2 position, SledParameters sledParam) : base("SledParameters", size, position)
+        public SledParamenterTab(SledParameters sledParam) : base("SledParameters")
         {
             this.sledPararms = sledParam;
         }

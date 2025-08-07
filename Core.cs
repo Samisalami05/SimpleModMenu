@@ -1,4 +1,7 @@
-﻿using MelonLoader;
+﻿using Harmony;
+using MelonLoader;
+using SimpleModMenu;
+using SimpleModMenu.Tabs;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -14,15 +17,18 @@ namespace SimpleModMenu
 
         private string sceneName = "";
 
+        public static int selectedTab = 0;
+
         public override void OnApplicationStart()
         {
             ui = new Ui();
+            InitTabs();
         }
 
         public override void OnSceneWasLoaded(int buildIndex, string sceneName)
         {
             this.sceneName = sceneName;
-            if (sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene") return;
+            if (IsGarageScene()) return;
 
             sledParams = new SledParameters();
             MelonCoroutines.Start(sledParams.Initialize());
@@ -30,16 +36,17 @@ namespace SimpleModMenu
 
         public override void OnUpdate()
         {
+            // 
             if (Input.GetKeyDown(KeyCode.RightShift))
             {
                 ui.menuOpen = !ui.menuOpen;
-                if (sceneName != "TitleScreen" || sceneName != "Garage" || sceneName != "LoadingScene")
+                if (!IsGarageScene())
                 {
                     Cursor.visible = ui.menuOpen;
                 }
             }
             
-            if (sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene") return;
+            if (IsGarageScene()) return;
 
             if (sledParams != null && sledParams.sledData != null)
             {
@@ -53,7 +60,34 @@ namespace SimpleModMenu
                 sledParams.GetSledData();
 
                 if (sledParams.sledData != null) 
-                    ui.setSledParams(sledParams);
+                    UpdateSledParams();
+            }
+        }
+
+        private bool IsGarageScene()
+        {
+            return sceneName == "TitleScreen" || sceneName == "Garage" || sceneName == "LoadingScene";
+        }
+
+        private void InitTabs()
+        {
+            Rect menuRect = Ui.GetMenuRect();
+            API.RegisterTab(new SledParamenterTab(sledParams));
+            API.RegisterTab(new EnvironmentTab());
+            API.RegisterTab(new FunTab());
+            API.RegisterTab(new SettingsTab());
+        }
+
+        private void UpdateSledParams()
+        {
+            int i = 0;
+            foreach (Tab tab in new List<Tab>(API.GetTabs()))
+            {
+                if (tab.title == "SledParameters")
+                {
+                    API.ReplaceTab(i, new SledParamenterTab(sledParams));
+                }
+                i++;
             }
         }
 

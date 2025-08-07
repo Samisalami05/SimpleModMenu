@@ -6,38 +6,20 @@ namespace SimpleModMenu
     internal class Ui
     {
         public bool menuOpen;
-        public Color themeColor;
+        public Color themeColor; // Todo: Add theme color functionality
 
-        private Rect menuRect;
-
-        private int selectedTab = 0;
-        private List<Tab> tabs = new List<Tab>();
-
-        private SledParameters sledParams;
+        private static Vector2 menuSize = new Vector2(800, 600);
+        private static Rect menuRect = new Rect(Screen.width / 2 - menuSize.x / 2, Screen.height / 2 - menuSize.y / 2, menuSize.x, menuSize.y);
 
         public Ui()
         {
             this.menuOpen = false;
-
-            Vector2 menuSize = new Vector2(800, 600);
-            float x = Screen.width / 2 - menuSize.x / 2;
-            float y = Screen.height / 2 - menuSize.y / 2;
-
-            this.menuRect = new Rect(x, y, menuSize.x, menuSize.y);
             this.themeColor = new Vector4(1f, 0f, 0f, 1f); // Red
-
-            initTabs();
-
         }
 
-        private void initTabs()
-        {
-            tabs.Add(new SledParamenterTab(menuRect.size, new Vector2(0, 0), sledParams));
-            tabs.Add(new EnvironmentTab(menuRect.size, new Vector2(0, 0)));
-            tabs.Add(new FunTab(menuRect.size, new Vector2(0, 0)));
-            tabs.Add(new SettingsTab(menuRect.size, new Vector2(0, 0)));
-        }
-
+        /// <summary>
+        /// Draws the mod menu if it is open. Should be called in a MelonEvents.OnGUI event.
+        /// </summary>
         public void DrawMenu()
         {
             if (!menuOpen) return;
@@ -67,12 +49,13 @@ namespace SimpleModMenu
 
 
             GUILayout.BeginHorizontal();
-            for (int i = 0; i < tabs.Count; i++)
-            {
-                if (GUILayout.Button(tabs[i].title, buttonStyle, gUILayoutOption))
+            int i = 0;
+            foreach (Tab tab in API.GetTabs()) {
+                if (GUILayout.Button(tab.title, buttonStyle, gUILayoutOption))
                 {
-                    selectedTab = i;
+                    Core.selectedTab = i;
                 }
+                i++;
             }
             GUILayout.EndHorizontal();
 
@@ -85,17 +68,20 @@ namespace SimpleModMenu
             GUI.BeginGroup(tabContentRect);
             
             // Draw the content of the selected tab
-            if (selectedTab >= 0 && selectedTab < tabs.Count)
+            if (Core.selectedTab >= 0 && Core.selectedTab < API.GetTabCount())
             {
-                tabs[selectedTab].DrawTab();
+                API.GetTab(Core.selectedTab).DrawTab();
             }
             GUI.EndGroup();
         }
 
-        public void setSledParams(SledParameters sledParams)
+        /// <summary>
+        /// Returns the rectangle for the menu window.
+        /// </summary>
+        /// <returns>The rectangle</returns>
+        public static Rect GetMenuRect()
         {
-            this.sledParams = sledParams;
-            this.tabs[tabs.FindIndex(tab => tab.title == "SledParameters")] = new SledParamenterTab(menuRect.size, new Vector2(0, 0), sledParams);
+            return menuRect;
         }
     }
 }

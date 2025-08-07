@@ -4,7 +4,7 @@ namespace SimpleModMenu.Tabs
 {
     internal class SettingsTab : Tab
     {
-        public SettingsTab(Vector2 size, Vector2 position) : base("Settings", size, position)
+        public SettingsTab() : base("Settings")
         {
             // Initialize any settings-specific data here
         }

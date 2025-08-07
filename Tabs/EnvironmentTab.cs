@@ -4,7 +4,7 @@ namespace SimpleModMenu.Tabs
 {
     internal class EnvironmentTab : Tab
     {
-        public EnvironmentTab(Vector2 size, Vector2 position) : base("Environment", size, position)
+        public EnvironmentTab() : base("Environment")
         {
             // Initialize any environment-specific data here
         }

@@ -23,11 +23,19 @@ namespace SimpleModMenu
             this.newValues = newValues;
         }
 
+        /// <summary>
+        /// Resets the new values to the original values.
+        /// </summary>
         public void resetToOriginal()
         {
             CopyValues(originalValues, newValues);
         }
 
+        /// <summary>
+        /// Copies the values from one MeshInterpretter to another.
+        /// </summary>
+        /// <param name="originValues">The origin MeshInterpretter</param>
+        /// <param name="destinationValues">The destination MeshInterpretter</param>
         public static void CopyValues(MeshInterpretter originValues, MeshInterpretter destinationValues)
         {
             destinationValues.power = originValues.power;

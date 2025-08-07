@@ -18,6 +18,10 @@ namespace SimpleModMenu
 
         public bool isInitialized = false;
 
+        /// <summary>
+        /// Initializes the sled parameters by finding the body and sled GameObjects.
+        /// </summary>
+        /// <returns>The IEnumerator</returns>
         public IEnumerator Initialize()
         {
             while (body == null)
@@ -36,11 +40,17 @@ namespace SimpleModMenu
             isInitialized = true;
         }
 
+        /// <summary>
+        /// Finds the body GameObject in the scene.
+        /// </summary>
         public void FindBody()
         {
             this.body = GameObject.Find("Snowmobile(Clone)/Body");
         }
 
+        /// <summary>
+        /// Finds the sled GameObject by searching for its parent for the CharacterControlPoints class.
+        /// </summary>
         public void FindSled()
         {
             if (body == null) return;
@@ -55,6 +65,9 @@ namespace SimpleModMenu
             }
         }
 
+        /// <summary>
+        /// Retrieves the sled data from the sled.
+        /// </summary>
         public void GetSledData()
         {
             if (meshInterpretter == null)
@@ -67,6 +80,9 @@ namespace SimpleModMenu
             SledData.CopyValues(meshInterpretter, sledData.newValues);
         }
 
+        /// <summary>
+        /// Applies the new sled parameters to the sled.
+        /// </summary>
         public void Apply()
         {
             if (meshInterpretter == null)
@@ -77,6 +93,9 @@ namespace SimpleModMenu
             SledData.CopyValues(sledData.newValues, meshInterpretter);
         }
 
+        /// <summary>
+        /// Retrieves the MeshInterpretter component from the sled's body GameObject.
+        /// </summary>
         public void GetMeshInterpretter()
         {
             if (body == null)
@@ -91,6 +110,9 @@ namespace SimpleModMenu
             }
         }
 
+        /// <summary>
+        /// Reloads the sled parameters by finding the body and sled GameObjects again.
+        /// </summary>
         public void Reload()
         {
             FindBody();
@@ -98,7 +120,10 @@ namespace SimpleModMenu
             FindSled();
             if (sled == null) { Melon<Core>.Logger.Error("Sled not found during reload"); }
         }
-         
+
+        /// <summary>
+        /// Checks if the sled or body has changed since the last initialization.
+        /// </summary>
         public void CheckIfSledChanged()
         {
             if (body == null || sled == null && isInitialized)
@@ -108,6 +133,24 @@ namespace SimpleModMenu
                 GetMeshInterpretter();
                 GetSledData();
             }
+        }
+
+        /// <summary>
+        /// Gets the sled GameObject.
+        /// </summary>
+        /// <returns>The gameobject</returns>
+        public GameObject GetSled()
+        {
+            return sled;
+        }
+
+        /// <summary>
+        /// Gets the body GameObject.
+        /// </summary>
+        /// <returns>The gameobject</returns>
+        public GameObject GetBody()
+        {
+            return body;
         }
     }
 }

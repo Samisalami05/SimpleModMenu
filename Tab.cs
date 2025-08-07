@@ -14,11 +14,11 @@ namespace SimpleModMenu
 
         private GUIStyle _centeredLabel;
 
-        public Tab(string title, Vector2 size, Vector2 position)
+        public Tab(string title)
         {
             this.title = title;
-            this.size = size;
-            this.position = position;
+            this.size = Ui.GetMenuRect().size;
+            this.position = new Vector2(0, 0);
         }
 
         public virtual void DrawTab()
@@ -65,6 +65,21 @@ namespace SimpleModMenu
             {
                 action?.Invoke();
             }
+        }
+
+        public void DrawButton(string label, float width, Action action)
+        {
+            float clampedWidth = Mathf.Clamp01(width); // Prevent values outside 0..1
+            float pixelWidth = Ui.GetMenuRect().width * clampedWidth;
+
+            GUILayout.BeginHorizontal();
+
+            if (GUILayout.Button(label, GUILayout.Width(pixelWidth)))
+            {
+                action?.Invoke();
+            }
+
+            GUILayout.EndHorizontal();
         }
     }
 }
