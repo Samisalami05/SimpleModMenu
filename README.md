@@ -28,7 +28,7 @@ Example of how to create a tab.
 ```cs
 namespace SimpleModMenu;
 
-class NewTab : SimpleModMenu.Tab
+class NewTab : Tab
 {
     private float ExampleValue = 50f;
     public NewTab() : base("Tab name")
